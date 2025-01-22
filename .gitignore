@@ -1,0 +1,5 @@
+*.o
+*.c
+*.out
+.vscode
+braingear
