@@ -1,6 +1,6 @@
 ﻿/*
  * BrainGear - A Brainfuck compiler that generates C code, implemented in C++.
- * Copyright (C) 2024 Andrey Stekolnikov <honakac@yandex.ru>
+ * Copyright (C) 2025 Andrey Stekolnikov <honakac@yandex.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
