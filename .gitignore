@@ -1,5 +1,5 @@
 *.o
-*.c
+examples/*.c
 *.out
 .vscode
 braingear

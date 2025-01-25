@@ -3,13 +3,13 @@
 ########################################################################
 
 # Compiler settings - Can be customized.
-CC = g++
-CXXFLAGS = -std=c++11 -Wall -O2 -pipe -march=native
+CC = gcc
+CXXFLAGS = -std=c11 -Wall -march=native -O2 -pipe
 LDFLAGS = 
 
 # Makefile settings - Can be customized.
 APPNAME = braingear
-EXT = .cpp
+EXT = .c
 SRCDIR = src
 OBJDIR = obj
 

@@ -6,12 +6,12 @@
 <br/>
 
 # braingear
-braingear is a compiler for the Brainfuck programming language that generates C code from .bf files.
+**braingear** is a Brainfuck interpreter and compiler written in C. <br> It's designed to be simple, portable, and easy to use.
 
 ## Features
 * Converts Brainfuck code into C code.
+* Interprets the Brainfuck file
 * Simple command-line interface.
-* Generates C files with the same name as the input file, adding a `.c` postfix.
 * Easy compilation and installation using make.
 ## Installation
 To install, run the following commands:
@@ -25,13 +25,22 @@ make
 Ensure you have a C compiler (e.g., gcc) and the make utility installed.
 
 ## Usage
+To run a Brainfuck file, use:
+
+```bash
+braingear run <input file>
+```
+
 To generate C code from a Brainfuck file, use:
 
 ```bash
-braingear <input file>
+braingear compile <input file> <output file>
 ```
 
-### For example:
+### For example (Compile program 'Hello, world'):
+
+> [!NOTE]
+> Examples are provided in the 'examples' directory.
 
 Input file hello.bf:
 
@@ -42,13 +51,13 @@ Input file hello.bf:
 Command:
 
 ```
-braingear hello.bf
+braingear compile hello.bf hello.c
 ```
 
 Compile and run:
 
 ```bash
-gcc -O2 -march=native -pipe hello.bf.c -o hello
+cc -O2 -march=native -pipe hello.c -o hello
 ./hello
 ```
 
