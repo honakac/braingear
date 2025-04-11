@@ -1,19 +1,28 @@
-/**
- * BrainGear - A Brainfuck compiler/interpreter implemented in C.
- * Copyright (C) 2025 Andrey Stekolnikov <honakac@yandex.ru>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+#pragma once
 
-unsigned char *vm_optimize_file(char* file);
+#include <glib.h>
+#include <stdio.h>
+#include <stddef.h>
+
+typedef long arg_type;
+
+typedef struct {
+    char buffer[65540];
+    unsigned short pos;
+    size_t index;
+} Memory;
+
+typedef struct {
+    char command;
+    arg_type arg;
+} Instruction;
+
+typedef struct {
+    GArray *instructions;
+    Memory mem;
+} VM;
+
+void vm_init(VM *vm);
+void vm_optimize(VM *vm, char *code);
+void vm_run(VM vm);
+void vm_compile(VM vm, char *outputFile);

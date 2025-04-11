@@ -1,54 +1,46 @@
-/*
- * BrainGear - A Brainfuck compiler/interpreter implemented in C.
- * Copyright (C) 2025 Andrey Stekolnikov <honakac@yandex.ru>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include "include/interpreter.h"
-#include "include/compiler.h"
 #include "include/vm.h"
+#include <stdio.h>
+#include <glib.h>
 
-#define PAGE_SIZE 512
-
-void usage(const char* prog)
-{
-    fprintf(stderr, "Usage: %s <compile|run> <input .bf file> [output .c file]\n", prog);
-    exit(1);
-}
-
-int main(int argc, char** argv)
-{
-    if (argc < 3)
-        usage(argv[0]);
-
-    unsigned char *bytecode = vm_optimize_file(argv[2]);
-
-    if (!strcmp(argv[1], "run"))
-        bf_run(bytecode);
-    else if (!strcmp(argv[1], "compile")) {
-        if (argc != 4)
-            usage(argv[0]);
-        
-        bf_compile(bytecode, argv[3]);
+int main(int argc, char *argv[]) {
+    if (argc < 3) {
+        printf("Usage: %s COMMAND OPTIONS\n", argv[0]);
+        printf("Commands:\n");
+        printf("    compile <file.bf> <file.c>  - Compiles a Brainfuck file into C code\n");
+        printf("    run     <file.bf>           - Runs a Brainfuck file\n");
+        return 1;
     }
-    else
-        usage(argv[0]);
 
+    FILE *file = fopen(argv[2], "r");
+    if (!file) {
+        printf("Failed to open file: %s\n", argv[2]);
+        return 1;
+    }
+
+    fseek(file, 0, SEEK_END);
+    long fsize = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    GString *data = g_string_sized_new(fsize); // Предвыделение памяти
+    g_string_append_len(data, (gchar*)malloc(fsize), fsize); // Чтение за один вызов
+    fread(data->str, 1, fsize, file);
+    fclose(file);
+
+    VM vm;
+    vm_init(&vm);
+    vm_optimize(&vm, data->str);
+
+    if (strcmp(argv[1], "run") == 0)
+        vm_run(vm);
+    else if (strcmp(argv[1], "compile") == 0) {
+        if (argc != 4) {
+            printf("Usage: %s compile <file.bf> <file.c>\n", argv[0]);
+            return 1;
+        }
+
+        vm_compile(vm, argv[3]);
+    }
+
+    g_string_free(data, TRUE);
     return 0;
 }

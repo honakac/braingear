@@ -4,7 +4,7 @@
 
 # Compiler settings - Can be customized.
 CC = gcc
-CXXFLAGS = -std=c11 -Wall -march=native -O2 -pipe
+CXXFLAGS = -std=c17 -Wall -O3 -flto -fomit-frame-pointer -funroll-loops `pkg-config --cflags --libs glib-2.0`
 LDFLAGS = 
 
 # Makefile settings - Can be customized.

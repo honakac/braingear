@@ -1,95 +1,150 @@
-/**
- * BrainGear - A Brainfuck compiler/interpreter implemented in C.
- * Copyright (C) 2025 Andrey Stekolnikov <honakac@yandex.ru>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include "include/vm.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "glib.h"
+#include <strings.h>
+#include "include/instructions.h"
 
-#define PAGE_SIZE 512
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
+Memory mem;
 
-typedef struct {
-    unsigned char *buffer;
-    size_t size;
-    size_t pos;
-} Memory;
-
-static void push_byte(Memory *mem, unsigned char byte)
+void vm_init(VM *vm)
 {
-    mem->buffer[mem->pos++] = byte;
-    mem->buffer[mem->pos] = 0;
-    
-    if (mem->pos >= mem->size - PAGE_SIZE)
-        mem->buffer = realloc(mem->buffer, (mem->size += PAGE_SIZE));
-    
-    if (mem->buffer == NULL) perror("vm: memory allocation failed");
-
-    // printf("Push byte: 0x%02x (%c)\n", byte, byte);
+    mem.pos = 0;
+    vm->instructions = g_array_new(TRUE, TRUE, sizeof(Instruction));
+    memset(mem.buffer, 0, sizeof(mem.buffer));
 }
 
-static long long get_repeat(FILE *fp, char byte)
+void vm_optimize(VM *vm, char *code)
 {
-    long long repeatCount = 1;
+    size_t i = 0;
 
-    char newByte = 0;
-    for (;(newByte = fgetc(fp)) != EOF && newByte == byte;)
-            repeatCount++;
-    
-    if (newByte != EOF)
-        fseek(fp, -1, SEEK_CUR);
-    
-    return repeatCount;
-}
+    for (char *ptr = code; *ptr; ptr++, i++) {
+        char ch = *ptr;
 
-unsigned char *vm_optimize_file(char *file)
-{
-    Memory code = { malloc(PAGE_SIZE), PAGE_SIZE, 0 };
-    if (code.buffer == NULL) perror("vm: memory allocation failed");
+        Instruction ins;
+        ins.command = ch;
+        ins.arg = 0;
 
-    memset(code.buffer, 0, code.size-1);
-    
-    FILE *fp = fopen(file, "r");
-    if (fp == NULL) perror("fopen");
+        arg_type count = 0;
+        switch (ch) {
+            case '[': case ']':
+                if (*ptr == ']' && *(ptr-1) == '-' && *(ptr-2) == '[') {
+                    vm->instructions->len -= 2;
 
-    push_byte(&code, 255);
+                    ins.command = '=';
+                    ins.arg = 0;
+                }
+                break;
 
-    for (char byte = 0; (byte = fgetc(fp)) != EOF;) {
-        switch (byte) {
-            case '+': case '-': case '>': case '<':
-                long long repeat = get_repeat(fp, byte);
+            case '+': case '-':
+                count = 0;
+                for (; *ptr; ptr++) {
+                    if (*ptr == '+')      count++;
+                    else if (*ptr == '-') count--;
+                    else                  break;
+                }
+                ptr--;
+
+                ins.arg = count;
+                break;
+            case '>': case '<':
+                count = 0;
+                for (; *ptr; ptr++) {
+                    if (*ptr == '>')      count++;
+                    else if (*ptr == '<') count--;
+                    else                  break;
+                }
+                ptr--;
+
+                ins.arg = count;
+                break;
+        }
+
+        g_array_append_val(vm->instructions, ins);
+    }
+
+    for (size_t i = 0; i < vm->instructions->len; i++) {
+        Instruction *ins = &g_array_index(vm->instructions, Instruction, i);
+
+        arg_type count = 0;
+        arg_type shift = 0;
+        switch (ins->command) {
+            case '[': case ']':
+                count = 1;
+                shift = 0;
 
                 do {
-                    push_byte(&code, byte);
-                    push_byte(&code, MIN(254, repeat));
-                    repeat -= 254;
-                } while (repeat > 254);
-                break;
-            case '.': case ',': case '[': case ']':
-                push_byte(&code, byte);
+                    shift += (ins->command == '[' ? 1 : -1);
+
+                    if (i + shift >= vm->instructions->len || i + shift < 0)
+                        break;
+
+                    char cur = g_array_index(vm->instructions, Instruction, i + shift).command;
+                    if      (cur == (ins->command == '[' ? '[' : ']')) count++;
+                    else if (cur == (ins->command == '[' ? ']' : '[')) count--;
+                } while (count > 0
+                         && i + shift < vm->instructions->len
+                         && i + shift > 0);
+
+                (&g_array_index(vm->instructions, Instruction, i))->arg = i + shift;
                 break;
         }
     }
+}
+
+void vm_run(VM vm)
+{
+    Memory *mem = &vm.mem;
+
+    GArray* instructions = vm.instructions;
+    Instruction* ins_arr = (Instruction*)instructions->data;
+    size_t len = instructions->len;
     
-    push_byte(&code, 255);
-    push_byte(&code, 255);
+    for (mem->index = 0; mem->index < len; mem->index++) {
+        Instruction ins = ins_arr[mem->index];
+        // printf("%lu %c %lu\n", vm.memory.index, ins.command, mem, ins.arg);
+        // ins.func(mem, ins.arg);
 
-    fclose(fp);
+        switch (ins.command) {
+            case '+': vi_add(mem, ins.arg); break;
+            case '-': vi_add(mem, ins.arg); break;
+            case '>': vi_move(mem, ins.arg); break;
+            case '<': vi_move(mem, ins.arg); break;
+            case ',': vi_input(mem, ins.arg); break;
+            case '.': vi_output(mem, ins.arg); break;
+            case '[': vi_jumpifzero(mem, ins.arg); break;
+            case ']': vi_jumpifnotzero(mem, ins.arg); break;
+            case '=': vi_set(mem, ins.arg); break;
+        }
+    }
+}
 
-    return code.buffer;
+void vm_compile(VM vm, char *outputFile)
+{
+    FILE *file = fopen(outputFile, "w");
+    if (!file) {
+        printf("Failed to open file: %s\n", outputFile);
+        return;
+    }
+
+    fprintf(file, "#include <stdio.h>\n");
+    fprintf(file, "#include <string.h>\n");
+    fprintf(file, "int main() {\n");
+    fprintf(file, "char buffer[65540];\n");
+    fprintf(file, "unsigned short i = 0;\n");
+    fprintf(file, "memset(buffer, 0, sizeof(buffer));\n");
+
+    for (size_t i = 0; i < vm.instructions->len; i++) {
+        Instruction ins = g_array_index(vm.instructions, Instruction, i);
+
+        switch (ins.command) {
+            case '+': case '-': fprintf(file, "buffer[i] += %d;\n", (int) ins.arg); break;
+            case '>': case '<': fprintf(file, "i += %d;\n", (int) ins.arg); break;
+            case ',': fprintf(file, "buffer[i] = getchar();\n"); break;
+            case '.': fprintf(file, "putchar(buffer[i]);\n"); break;
+            case '[': fprintf(file, "while (buffer[i] != 0) {\n"); break;
+            case ']': fprintf(file, "}\n"); break;
+            case '=': fprintf(file, "buffer[i] = %d;\n", (char) ins.arg); break;
+        }
+    }
+    fprintf(file, "}\n");
+    fclose(file);
 }
