@@ -31,14 +31,14 @@ int main(int argc, char *argv[]) {
     vm_optimize(&vm, data->str);
 
     if (strcmp(argv[1], "run") == 0)
-        vm_run(vm);
+        vm_run(&vm);
     else if (strcmp(argv[1], "compile") == 0) {
         if (argc != 4) {
             printf("Usage: %s compile <file.bf> <file.c>\n", argv[0]);
             return 1;
         }
 
-        vm_compile(vm, argv[3]);
+        vm_compile(&vm, argv[3]);
     }
 
     g_string_free(data, TRUE);

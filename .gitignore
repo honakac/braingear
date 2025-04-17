@@ -3,3 +3,10 @@ examples/*.c
 *.out
 .vscode
 braingear
+
+# Xmake cache
+.xmake/
+build/
+
+# MacOS Cache
+.DS_Store

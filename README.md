@@ -9,17 +9,17 @@
 **braingear** is a Brainfuck interpreter and compiler written in C++. <br> It's designed to be simple, portable, and easy to use.
 
 ## Features
-* Converts Brainfuck code into C code.
 * Interprets the Brainfuck file
+* Converts Brainfuck code into C code.
 * Simple command-line interface.
-* Easy compilation and installation using make.
-## Installation
-To install, run the following commands:
+* Easy compilation and installation using xmake.
+## Build
+To build, run the following commands:
 
 ```bash
 git clone https://github.com/honakac/braingear.git
 cd braingear
-make
+xmake build
 ```
 
 Ensure you have a C compiler (e.g., gcc) and the make utility installed.

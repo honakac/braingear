@@ -4,12 +4,26 @@
 #include <stdio.h>
 #include <stddef.h>
 
-typedef long arg_type;
+#define MEMORY_SIZE 65540
+
+enum {
+    IT_NONE = 0,
+    IT_ADD = '+',
+    IT_MOVE = '>',
+    IT_INPUT = ',',
+    IT_OUTPUT = '.',
+    IT_JZ = '[',
+    IT_JNZ = ']',
+    IT_SET = '=',
+    IT_ZERO = '0',
+    IT_CLEAR_MOVE = '#'
+};
+
+typedef signed long arg_type;
 
 typedef struct {
-    char buffer[65540];
+    char *buffer;
     unsigned short pos;
-    size_t index;
 } Memory;
 
 typedef struct {
@@ -23,6 +37,6 @@ typedef struct {
 } VM;
 
 void vm_init(VM *vm);
-void vm_optimize(VM *vm, char *code);
-void vm_run(VM vm);
-void vm_compile(VM vm, char *outputFile);
+void vm_optimize(VM *vm, const char *code);
+void vm_run(VM *vm);
+void vm_compile(VM *vm, const char *outputFile);
