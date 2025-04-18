@@ -40,14 +40,12 @@ void vm_detect_brackets(VM *vm)
             default:
                 break;
         }
-
-        ins = g_array_index(vm->instructions, Instruction, i);
     }
 }
 
-void vm_optimize(VM *vm, const char *code)
+void vm_optimize(VM *vm, char *code)
 {
-    for (char *ptr = (char*) code; *ptr; ptr++) {
+    for (char *ptr = code; *ptr; ptr++) {
         char ch = *ptr;
 
         Instruction ins;
@@ -57,7 +55,7 @@ void vm_optimize(VM *vm, const char *code)
         arg_type count = 0;
         switch (ch) {
             case '[': case ']':
-                ins.command = ch;
+                ins.command = ch == '[' ? IT_JZ : IT_JNZ;
 
                 if (*ptr == ']' && *(ptr-1) == '-' && *(ptr-2) == '[') {
                     vm->instructions->len -= 2;
@@ -175,6 +173,7 @@ void vm_optimize(VM *vm, const char *code)
                     g_array_remove_range(vm->instructions, i + 1, 5);
                 }
                 break;
+            default: break;
         }
     }
 

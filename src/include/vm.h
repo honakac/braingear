@@ -8,17 +8,17 @@
 
 enum {
     IT_NONE = 0,
-    IT_ADD = '+',
-    IT_MOVE = '>',
-    IT_INPUT = ',',
-    IT_OUTPUT = '.',
-    IT_JZ = '[',
-    IT_JNZ = ']',
-    IT_SET = '=',
-    IT_ZERO = '0',
-    IT_CLEAR_MOVE = '#',
-    IT_MOVE_ADD = ';',
-    IT_FOLD_LOOP = ':'
+    IT_ADD,
+    IT_MOVE,
+    IT_INPUT,
+    IT_OUTPUT,
+    IT_JZ,
+    IT_JNZ,
+    IT_SET,
+    IT_ZERO,
+    IT_CLEAR_MOVE,
+    IT_MOVE_ADD,
+    IT_FOLD_LOOP
 };
 
 typedef signed long arg_type;
@@ -41,6 +41,6 @@ typedef struct {
 } VM;
 
 void vm_init(VM *vm);
-void vm_optimize(VM *vm, const char *code);
+void vm_optimize(VM *vm, char *code);
 void vm_run(VM *vm);
 void vm_compile(VM *vm, const char *outputFile);
