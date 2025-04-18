@@ -3,7 +3,7 @@ name: CI Builds
 on:
   push:
     branches:
-      - '*'  # Trigger on all branches
+      - '*'
 
 jobs:
   build:
@@ -28,6 +28,12 @@ jobs:
       - name: Install Dependencies (Windows)
         if: matrix.os == 'windows-latest'
         run: choco install mingw -y
+
+      - name: Install Ubuntu Dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y meson libpcre2-dev libglib2.0-dev
 
       - name: Setup Xmake
         run: |
