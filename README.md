@@ -6,7 +6,7 @@
 <br/>
 
 # braingear
-**braingear** is a Brainfuck interpreter and compiler written in C++. <br> It's designed to be simple, portable, and easy to use.
+**braingear** is a Brainfuck interpreter and compiler written in C. <br> It's designed to be simple, portable, and easy to use.
 
 ## Features
 * Interprets the Brainfuck file
