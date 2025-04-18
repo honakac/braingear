@@ -64,4 +64,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}-latest
-          path: ./build/**/*release/*
+          path: ./build/**/release/braingear*
