@@ -28,11 +28,18 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: powershell
         run: |
+          # Install Mingw
           choco install mingw -y
-          Invoke-WebRequest https://github.com/xmake-io/xmake/releases/download/v2.8.7/xmake-v2.8.7.win64.zip -OutFile xmake.zip
-          Expand-Archive -Path xmake.zip -DestinationPath xmake
-          echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH
-          echo "$pwd\xmake" >> $env:GITHUB_PATH
+          
+          # Install xmake using official script
+          iex (irm https://xmake.io/psget.text)
+          
+          # Force update PATH for current session
+          $env:PATH = [
+            "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin",
+            "$env:USERPROFILE\.xmake\bin",
+            $env:PATH
+          ] -join ';'
 
       - name: Install Ubuntu Dependencies
         if: matrix.os == 'ubuntu-latest'
