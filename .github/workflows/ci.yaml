@@ -2,8 +2,7 @@ name: CI Builds
 
 on:
   push:
-    branches:
-      - '*'
+    branches: ['*']
 
 jobs:
   build:
@@ -25,9 +24,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Dependencies (Windows)
+      - name: Install Windows Dependencies
         if: matrix.os == 'windows-latest'
-        run: choco install mingw -y
+        shell: powershell
+        run: |
+          choco install mingw -y
+          Invoke-WebRequest https://github.com/xmake-io/xmake/releases/download/v2.8.7/xmake-v2.8.7.win64.zip -OutFile xmake.zip
+          Expand-Archive -Path xmake.zip -DestinationPath xmake
+          echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH
+          echo "$pwd\xmake" >> $env:GITHUB_PATH
 
       - name: Install Ubuntu Dependencies
         if: matrix.os == 'ubuntu-latest'
@@ -35,7 +40,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y meson libpcre2-dev libglib2.0-dev
 
-      - name: Setup Xmake
+      - name: Setup Xmake (non-Windows)
+        if: matrix.os != 'windows-latest'
         run: |
           curl -fsSL https://xmake.io/shget.text | bash
           echo "$HOME/.xmake/bin" >> $GITHUB_PATH
