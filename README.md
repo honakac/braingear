@@ -66,7 +66,7 @@ Hello World!
 [rustyfuck](https://github.com/OctoBanon-Main/rustyfuck) - A Brainfuck interpreter written in Rust by OctoBanon
 
 ## License
-This project is licensed under the GNU General Public License v3.0: https://www.gnu.org/licenses/gpl-3.0.html
+This project is licensed under the MIT license
 
 ## Contact
 If you have any questions or suggestions, feel free to reach out via GitHub: https://github.com/honakac/braingear
