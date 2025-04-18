@@ -16,7 +16,9 @@ enum {
     IT_JNZ = ']',
     IT_SET = '=',
     IT_ZERO = '0',
-    IT_CLEAR_MOVE = '#'
+    IT_CLEAR_MOVE = '#',
+    IT_MOVE_ADD = ';',
+    IT_FOLD_LOOP = ':'
 };
 
 typedef signed long arg_type;
@@ -29,6 +31,8 @@ typedef struct {
 typedef struct {
     char command;
     arg_type arg;
+    arg_type arg2;
+    arg_type arg3;
 } Instruction;
 
 typedef struct {

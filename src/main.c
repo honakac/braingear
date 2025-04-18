@@ -42,5 +42,6 @@ int main(int argc, char *argv[]) {
     }
 
     g_string_free(data, TRUE);
+    g_array_free(vm.instructions, TRUE);
     return 0;
 }
