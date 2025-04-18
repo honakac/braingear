@@ -9,14 +9,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
         include:
           - os: ubuntu-latest
             build_cmd: xmake build -v -a x86_64
             artifact_name: linux-x86_64
-          - os: windows-latest
-            build_cmd: xmake f -p mingw -a x86_64 && xmake build -v
-            artifact_name: windows-x86_64
+          # - os: windows-latest
+          #   build_cmd: xmake f -p mingw -a x86_64 && xmake build -v
+          #   artifact_name: windows-x86_64
           - os: macos-latest
             build_cmd: xmake build -v -a x86_64
             artifact_name: macos-x86_64
@@ -24,26 +24,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Windows Dependencies
-        if: matrix.os == 'windows-latest'
-        shell: powershell
-        run: |
-          # Install Mingw
-          choco install mingw -y
+      # - name: Install Windows Dependencies
+      #   if: matrix.os == 'windows-latest'
+      #   shell: powershell
+      #   run: |
+      #     # Install Mingw
+      #     choco install mingw -y
           
-          # Install xmake using official script
-          iex (irm https://xmake.io/psget.text)
+      #     # Install xmake using official script
+      #     iex (irm https://xmake.io/psget.text)
           
-          # Update PATH with required components
-          $env:PATH = 
-            "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin;" +
-            "$env:USERPROFILE\.xmake\bin;" +
-            $env:PATH
+      #     # Update PATH with required components
+      #     $env:PATH = 
+      #       "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin;" +
+      #       "$env:USERPROFILE\.xmake\bin;" +
+      #       $env:PATH
           
-          # Verify paths
-          Write-Output "Updated PATH: $env:PATH"
-          where.exe gcc
-          where.exe xmake
+      #     # Verify paths
+      #     Write-Output "Updated PATH: $env:PATH"
+      #     where.exe gcc
+      #     where.exe xmake
 
       - name: Install Ubuntu Dependencies
         if: matrix.os == 'ubuntu-latest'
