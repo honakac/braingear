@@ -34,12 +34,16 @@ jobs:
           # Install xmake using official script
           iex (irm https://xmake.io/psget.text)
           
-          # Force update PATH for current session
-          $env:PATH = [
-            "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin",
-            "$env:USERPROFILE\.xmake\bin",
+          # Update PATH with required components
+          $env:PATH = 
+            "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin;" +
+            "$env:USERPROFILE\.xmake\bin;" +
             $env:PATH
-          ] -join ';'
+          
+          # Verify paths
+          Write-Output "Updated PATH: $env:PATH"
+          where.exe gcc
+          where.exe xmake
 
       - name: Install Ubuntu Dependencies
         if: matrix.os == 'ubuntu-latest'
